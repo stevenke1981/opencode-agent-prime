@@ -1,0 +1,35 @@
+{
+  "$schema": "../opencode-agent-prime.schema.json",
+  "preset": "openai",
+  "locale": "zh-TW",
+  "lessons": {
+    "enabled": true,
+    "path": "lessons.md",
+    "readAtSessionStart": true,
+    "promptAfterIdle": true
+  },
+  "planMode": {
+    "enabled": true,
+    "plansDir": ".opencode/plans",
+    "minComplexity": "L3"
+  },
+  "memoryMcp": {
+    "enabled": true,
+    "serverName": "codebase-memory-mcp",
+    "remindAtTaskStart": true
+  },
+  "errorRecovery": {
+    "enabled": true,
+    "minAttemptsBeforeEscalate": 3
+  },
+  "presets": {
+    "openai": {
+      "orchestrator": { "model": "openai/gpt-5.5" },
+      "oracle": { "model": "openai/gpt-5.5", "variant": "high" },
+      "librarian": { "model": "openai/gpt-5.4-mini", "variant": "low" },
+      "explorer": { "model": "openai/gpt-5.4-mini", "variant": "low" },
+      "designer": { "model": "openai/gpt-5.4-mini", "variant": "medium" },
+      "fixer": { "model": "openai/gpt-5.4-mini", "variant": "low" }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "opencode-agent-prime",
+    "~/.config/opencode/plugins/opencode-git-tools.ts",
+    "~/.config/opencode/plugins/git-bash-opencode-plugin.ts"
+  ],
+  "agent": {
+    "build": { "disable": true },
+    "explore": { "disable": true },
+    "general": { "disable": true },
+    "plan": { "disable": true }
+  },
+  "mcp": {
+    "codebase-memory-mcp": {
+      "command": "C:\\Users\\eda\\.local\\bin\\codebase-memory-mcp.exe",
+      "args": [],
+      "enabled": true
+    }
+  },
+  "lsp": true
+}
