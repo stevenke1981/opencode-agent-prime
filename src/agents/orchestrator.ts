@@ -2,6 +2,19 @@ import type { AgentConfig } from "@opencode-ai/sdk/v2";
 import type { PluginConfig } from "../config";
 import { type AgentDefinition, buildSpecialistBlock } from "./specialists";
 
+/**
+ * Resolve agent prompt from base/custom/append inputs.
+ */
+export function resolvePrompt(
+  base: string,
+  customPrompt?: string,
+  customAppendPrompt?: string,
+): string {
+  if (customPrompt) return customPrompt;
+  if (customAppendPrompt) return `${base}\n\n${customAppendPrompt}`;
+  return base;
+}
+
 function localeBlock(locale: PluginConfig["locale"]): string {
   if (locale === "zh-TW") {
     return `## Communication (mandatory)
@@ -13,9 +26,29 @@ function localeBlock(locale: PluginConfig["locale"]): string {
 - Reply in clear English unless the user requests another language.`;
 }
 
+const COUNCIL_BLOCK = `@council
+- Role: Multi-LLM consensus — parallel councillors, synthesized answer
+- Delegate when: High-stakes decisions, ambiguous trade-offs, user asks for
+  multiple opinions, confidence beyond a single model
+- Don't delegate when: Routine implementation, speed matters, single specialist
+  is clearly sufficient`;
+
+function backgroundDelegationBlock(): string {
+  return `## OpenCode task delegation (background subagents)
+- Use the native \`task\` tool to delegate to specialists (@explorer, @fixer, …).
+- \`run_in_background=false\` — blocking: wait for results before continuing.
+- \`run_in_background=true\` — parallel: launch independent branches, reconcile later.
+- Always pass \`run_in_background\` explicitly (required by OpenCode).
+- Parallelize only independent branches; keep dependent steps sequential.
+- Reuse specialist sessions when context still matches (see resumable_sessions).
+- Enable experimental background subagents:
+  \`OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=1 opencode\``;
+}
+
 export function buildOrchestratorPrompt(config: PluginConfig): string {
   const specialists = buildSpecialistBlock();
   const lessonsPath = config.lessons.path;
+  const councilSection = config.council ? `\n\n${COUNCIL_BLOCK}` : "";
 
   return `You are AGENT-PRIME — the omnipotent execution orchestrator for OpenCode.
 
@@ -40,12 +73,14 @@ Write .opencode/plans/<task-name>.md with goal, sub-tasks, risks, definition of
 done, and assumptions before multi-file implementation.
 
 ## Delegation specialists
-${specialists}
+${specialists}${councilSection}
+
+${backgroundDelegationBlock()}
 
 ## Delegation rules
 - Orchestrator plans, routes, verifies, and integrates — not bulk implementation.
 - Single small edit (<20 lines, one file): do it yourself.
-- Parallel discovery: spawn multiple @explorer tasks.
+- Parallel discovery: spawn multiple @explorer tasks with run_in_background=true.
 - Parallel implementation: scope per folder and spawn @fixer per scope.
 - After 2+ failed fix attempts on the same issue: delegate to @oracle.
 
@@ -78,4 +113,5 @@ export function createOrchestratorAgent(
   };
 }
 
+export type { AgentDefinition } from "./specialists";
 export type { AgentConfig };

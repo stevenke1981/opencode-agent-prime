@@ -6,13 +6,25 @@ export const SUBAGENT_NAMES = [
   "oracle",
   "designer",
   "fixer",
+  "council",
+  "councillor",
 ] as const;
 
 export const ALL_AGENT_NAMES = [ORCHESTRATOR_NAME, ...SUBAGENT_NAMES] as const;
 
 export type AgentName = (typeof ALL_AGENT_NAMES)[number];
 
-export const ORCHESTRATABLE_AGENTS = [...SUBAGENT_NAMES] as const;
+export const ORCHESTRATABLE_AGENTS = [
+  "explorer",
+  "librarian",
+  "oracle",
+  "designer",
+  "fixer",
+  "council",
+] as const;
+
+/** Agents that cannot be disabled even if listed in disabled_agents config. */
+export const PROTECTED_AGENTS = new Set<string>(["orchestrator", "councillor"]);
 
 export const DEFAULT_DISABLED_AGENTS = new Set<string>();
 
@@ -23,7 +35,23 @@ export const DEFAULT_MODELS: Record<AgentName, string | undefined> = {
   explorer: "openai/gpt-5.4-mini",
   designer: "openai/gpt-5.4-mini",
   fixer: "openai/gpt-5.4-mini",
+  council: "openai/gpt-5.4-mini",
+  councillor: "openai/gpt-5.4-mini",
 };
+
+export const POLL_INTERVAL_MS = 500;
+export const POLL_INTERVAL_SLOW_MS = 1000;
+export const POLL_INTERVAL_BACKGROUND_MS = 2000;
+
+export const DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
+export const MAX_POLL_TIME_MS = 5 * 60 * 1000;
+
+export const DEFAULT_MAX_SUBAGENT_DEPTH = 3;
+
+export const TMUX_SPAWN_DELAY_MS = 500;
+export const COUNCILLOR_STAGGER_MS = 250;
+
+export const STABLE_POLLS_THRESHOLD = 3;
 
 export const PLAN_MODE_REMINDER = `<plan_mode_protocol>
 Complex tasks (L3+: multi-file, architectural impact) require a plan file at

@@ -15,14 +15,19 @@
           "librarian",
           "oracle",
           "designer",
-          "fixer"
+          "fixer",
+          "council",
+          "councillor"
         ]
       }
     },
     "locale": {
       "default": "zh-TW",
       "type": "string",
-      "enum": ["zh-TW", "en"]
+      "enum": [
+        "zh-TW",
+        "en"
+      ]
     },
     "lessons": {
       "default": {
@@ -70,7 +75,12 @@
         "minComplexity": {
           "default": "L3",
           "type": "string",
-          "enum": ["L1", "L2", "L3", "L4"]
+          "enum": [
+            "L1",
+            "L2",
+            "L3",
+            "L4"
+          ]
         }
       }
     },
@@ -188,6 +198,99 @@
           }
         }
       }
+    },
+    "sessionManager": {
+      "type": "object",
+      "properties": {
+        "maxSessionsPerAgent": {
+          "default": 2,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "readContextMinLines": {
+          "default": 10,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "readContextMaxFiles": {
+          "default": 8,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        }
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "properties": {
+        "retry_on_empty": {
+          "default": true,
+          "type": "boolean"
+        }
+      }
+    },
+    "council": {
+      "type": "object",
+      "properties": {
+        "presets": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          }
+        },
+        "timeout": {
+          "default": 180000,
+          "type": "number",
+          "minimum": 0
+        },
+        "default_preset": {
+          "default": "default",
+          "type": "string"
+        },
+        "councillor_execution_mode": {
+          "default": "parallel",
+          "description": "Execution mode for councillors. \"serial\" runs them one at a time (required for single-model systems). \"parallel\" runs them concurrently (default, faster for multi-model systems).",
+          "type": "string",
+          "enum": [
+            "parallel",
+            "serial"
+          ]
+        },
+        "councillor_retries": {
+          "default": 3,
+          "description": "Number of retry attempts for councillors that return empty responses (e.g. due to provider rate limiting). Default: 3 retries.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "master": {
+          "description": "DEPRECATED — ignored. Council agent synthesizes directly."
+        },
+        "master_timeout": {
+          "description": "DEPRECATED — ignored. Use \"timeout\" instead."
+        },
+        "master_fallback": {
+          "description": "DEPRECATED — ignored. No separate master session."
+        }
+      },
+      "required": [
+        "presets"
+      ]
     }
   },
   "additionalProperties": false,

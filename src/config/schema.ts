@@ -1,5 +1,14 @@
 import { z } from "zod";
 import { ALL_AGENT_NAMES } from "./constants";
+import { CouncilConfigSchema } from "./council-schema";
+
+export const SessionManagerConfigSchema = z.object({
+  maxSessionsPerAgent: z.number().int().min(1).max(10).default(2),
+  readContextMinLines: z.number().int().min(0).max(1000).default(10),
+  readContextMaxFiles: z.number().int().min(0).max(50).default(8),
+});
+
+export type SessionManagerConfig = z.infer<typeof SessionManagerConfigSchema>;
 
 export const AgentOverrideConfigSchema = z.object({
   model: z.string().optional(),
@@ -62,6 +71,13 @@ export const PluginConfigSchema = z
     presets: z
       .record(z.string(), z.record(z.string(), AgentOverrideConfigSchema))
       .optional(),
+    sessionManager: SessionManagerConfigSchema.optional(),
+    fallback: z
+      .object({
+        retry_on_empty: z.boolean().default(true),
+      })
+      .optional(),
+    council: CouncilConfigSchema.optional(),
   })
   .strict();
 

@@ -6,8 +6,11 @@ import {
   getAgentOverride,
   loadPluginConfig,
   type PluginConfig,
+  PROTECTED_AGENTS,
   SUBAGENT_NAMES,
 } from "../config";
+import { createCouncilAgent } from "./council";
+import { createCouncillorAgent } from "./councillor";
 import { createOrchestratorAgent } from "./orchestrator";
 import { createSpecialistAgent } from "./specialists";
 
@@ -16,6 +19,17 @@ export interface RegisteredAgent {
   description?: string;
   config: SDKAgentConfig;
 }
+
+const COUNCIL_TOOL_ALLOWED_AGENTS = new Set(["council"]);
+
+const USER_FACING_SUBAGENTS = [
+  "explorer",
+  "librarian",
+  "oracle",
+  "designer",
+  "fixer",
+  "council",
+] as const;
 
 function applyOverride(
   agent: RegisteredAgent,
@@ -29,10 +43,50 @@ function applyOverride(
   }
 }
 
+function applyDefaultPermissions(agent: RegisteredAgent): void {
+  const existing = (agent.config.permission ?? {}) as Record<
+    string,
+    "ask" | "allow" | "deny" | Record<string, "ask" | "allow" | "deny">
+  >;
+
+  const questionPerm = existing.question === "deny" ? "deny" : "allow";
+  const councilSessionPerm = COUNCIL_TOOL_ALLOWED_AGENTS.has(agent.name)
+    ? (existing.council_session ?? "allow")
+    : "deny";
+
+  agent.config.permission = {
+    ...existing,
+    question: questionPerm,
+    council_session: councilSessionPerm,
+  } as SDKAgentConfig["permission"];
+}
+
+function applyAgentClassification(name: string, config: SDKAgentConfig): void {
+  if (name === "council") {
+    config.mode = "all";
+    return;
+  }
+  if (name === "councillor") {
+    config.mode = "subagent";
+    (config as SDKAgentConfig & { hidden?: boolean }).hidden = true;
+    return;
+  }
+  if (name === "orchestrator") {
+    config.mode = "primary";
+    return;
+  }
+  config.mode = "subagent";
+}
+
 export function getDisabledAgents(config: PluginConfig): Set<string> {
   const disabled = new Set(DEFAULT_DISABLED_AGENTS);
   for (const name of config.disabled_agents ?? []) {
-    disabled.add(name);
+    if (!PROTECTED_AGENTS.has(name)) {
+      disabled.add(name);
+    }
+  }
+  if (!config.council) {
+    disabled.add("council");
   }
   return disabled;
 }
@@ -52,18 +106,39 @@ export function createAgents(
         DEFAULT_MODELS.orchestrator,
     );
     applyOverride(orchestrator, getAgentOverride(resolved, "orchestrator"));
+    applyDefaultPermissions(orchestrator);
     agents.orchestrator = orchestrator;
   }
 
-  for (const name of SUBAGENT_NAMES) {
+  for (const name of USER_FACING_SUBAGENTS) {
     if (disabled.has(name)) continue;
     const model =
       getAgentOverride(resolved, name)?.model ??
       DEFAULT_MODELS[name as keyof typeof DEFAULT_MODELS];
     if (!model) continue;
-    const specialist = createSpecialistAgent(name, model);
-    applyOverride(specialist, getAgentOverride(resolved, name));
-    agents[name] = specialist;
+
+    const agent =
+      name === "council"
+        ? createCouncilAgent(model)
+        : createSpecialistAgent(name, model);
+
+    applyOverride(agent, getAgentOverride(resolved, name));
+    applyDefaultPermissions(agent);
+    applyAgentClassification(name, agent.config);
+    agents[name] = agent;
+  }
+
+  if (!disabled.has("councillor")) {
+    const councillorModel =
+      getAgentOverride(resolved, "councillor")?.model ??
+      DEFAULT_MODELS.councillor;
+    if (councillorModel) {
+      const councillor = createCouncillorAgent(councillorModel);
+      applyOverride(councillor, getAgentOverride(resolved, "councillor"));
+      applyDefaultPermissions(councillor);
+      applyAgentClassification("councillor", councillor.config);
+      agents.councillor = councillor;
+    }
   }
 
   return agents;
@@ -79,4 +154,4 @@ export function getAgentConfigs(
   return configs;
 }
 
-export { ALL_AGENT_NAMES };
+export { ALL_AGENT_NAMES, SUBAGENT_NAMES };

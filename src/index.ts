@@ -1,12 +1,22 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { createAgents, getAgentConfigs } from "./agents";
 import { loadPluginConfig } from "./config";
+import { CouncilManager } from "./council";
 import {
+  createDelegateTaskRetryHook,
   createErrorRecoveryHook,
   createLessonsRsiHook,
   createMemoryMcpHook,
   createPlanModeHook,
+  createTaskSessionManagerHook,
 } from "./hooks";
+import {
+  ast_grep_replace,
+  ast_grep_search,
+  createCouncilTool,
+  createWebfetchTool,
+} from "./tools";
+import { SubagentDepthTracker } from "./utils/subagent-depth";
 
 async function appLog(
   ctx: Parameters<Plugin>[0],
@@ -24,12 +34,23 @@ async function appLog(
   }
 }
 
+async function probeJSDOM(): Promise<string | null> {
+  try {
+    const { JSDOM } = await import("jsdom");
+    new JSDOM("<!DOCTYPE html><html><body>test</body></html>");
+    return null;
+  } catch (err) {
+    return String(err);
+  }
+}
+
 const OpenCodeAgentPrime: Plugin = async (ctx) => {
   const config = loadPluginConfig(ctx.directory);
   const agents = createAgents(ctx.directory, config);
   const agentConfigs = getAgentConfigs(agents);
 
   const sessionAgents = new Map<string, string>();
+  const depthTracker = new SubagentDepthTracker();
 
   const getAgentName = (sessionID: string): string | undefined =>
     sessionAgents.get(sessionID);
@@ -40,14 +61,47 @@ const OpenCodeAgentPrime: Plugin = async (ctx) => {
   const planModeHook = createPlanModeHook(config, { getAgentName });
   const memoryMcpHook = createMemoryMcpHook(config, { getAgentName });
   const errorRecoveryHook = createErrorRecoveryHook(config, { getAgentName });
+  const delegateTaskRetryHook = createDelegateTaskRetryHook(ctx);
+  const taskSessionManagerHook = createTaskSessionManagerHook(ctx, {
+    maxSessionsPerAgent: config.sessionManager?.maxSessionsPerAgent ?? 2,
+    readContextMinLines: config.sessionManager?.readContextMinLines ?? 10,
+    readContextMaxFiles: config.sessionManager?.readContextMaxFiles ?? 8,
+    shouldManageSession: (sessionID) =>
+      sessionAgents.get(sessionID) === "orchestrator",
+  });
+
+  const councilTools = config.council
+    ? createCouncilTool(
+        ctx,
+        new CouncilManager(ctx, config, depthTracker, false),
+      )
+    : {};
+
+  const webfetch = createWebfetchTool(ctx);
 
   await appLog(
     ctx,
     "info",
-    `Loaded ${Object.keys(agentConfigs).length} agents (locale: ${config.locale})`,
+    `Loaded ${Object.keys(agentConfigs).length} agents, ${
+      Object.keys(councilTools).length + 3
+    } tools (locale: ${config.locale})`,
   );
 
+  probeJSDOM().then((err) => {
+    if (err) {
+      const msg = `jsdom probe failed; webfetch tool will not work: ${err}`;
+      appLog(ctx, "warn", msg).catch(() => {});
+    }
+  });
+
   return {
+    tool: {
+      ...councilTools,
+      webfetch,
+      ast_grep_search,
+      ast_grep_replace,
+    },
+
     config: async (opencodeConfig) => {
       const existingAgents = (opencodeConfig.agent ?? {}) as Record<
         string,
@@ -84,6 +138,25 @@ const OpenCodeAgentPrime: Plugin = async (ctx) => {
         if (sessionID) sessionAgents.delete(sessionID);
       }
       await lessonsHook.event(input);
+      await taskSessionManagerHook.event(
+        input as {
+          event: {
+            type: string;
+            properties?: { info?: { id?: string }; sessionID?: string };
+          };
+        },
+      );
+    },
+
+    "tool.execute.before": async (input, output) => {
+      await taskSessionManagerHook["tool.execute.before"](
+        input as {
+          tool: string;
+          sessionID?: string;
+          callID?: string;
+        },
+        output as { args?: unknown },
+      );
     },
 
     "experimental.chat.system.transform": async (input, output) => {
@@ -114,7 +187,39 @@ const OpenCodeAgentPrime: Plugin = async (ctx) => {
       }
     },
 
-    "tool.execute.after": errorRecoveryHook["tool.execute.after"],
+    "experimental.chat.messages.transform": async (input, output) => {
+      await taskSessionManagerHook["experimental.chat.messages.transform"](
+        input,
+        output as {
+          messages: Array<{
+            info: { role: string; agent?: string; sessionID?: string };
+            parts: Array<{ type: string; text?: string }>;
+          }>;
+        },
+      );
+    },
+
+    "tool.execute.after": async (input, output) => {
+      await errorRecoveryHook["tool.execute.after"](
+        input as {
+          tool: string;
+          sessionID?: string;
+          error?: unknown;
+        },
+      );
+      await delegateTaskRetryHook["tool.execute.after"](
+        input as { tool: string },
+        output as { output: unknown },
+      );
+      await taskSessionManagerHook["tool.execute.after"](
+        input as {
+          tool: string;
+          sessionID?: string;
+          callID?: string;
+        },
+        output as { output: unknown },
+      );
+    },
   };
 };
 

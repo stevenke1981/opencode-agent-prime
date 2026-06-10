@@ -20,4 +20,19 @@ describe("buildOrchestratorPrompt", () => {
     const prompt = buildOrchestratorPrompt(config);
     expect(prompt).toContain(".opencode/plans");
   });
+
+  test("includes council and background delegation when council configured", () => {
+    const config = PluginConfigSchema.parse({
+      council: {
+        presets: {
+          default: {
+            alpha: { model: "openai/gpt-5.4-mini" },
+          },
+        },
+      },
+    });
+    const prompt = buildOrchestratorPrompt(config);
+    expect(prompt).toContain("@council");
+    expect(prompt).toContain("run_in_background");
+  });
 });

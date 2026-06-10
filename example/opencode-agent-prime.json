@@ -22,6 +22,23 @@
     "enabled": true,
     "minAttemptsBeforeEscalate": 3
   },
+  "sessionManager": {
+    "maxSessionsPerAgent": 2,
+    "readContextMinLines": 10,
+    "readContextMaxFiles": 8
+  },
+  "council": {
+    "presets": {
+      "default": {
+        "alpha": { "model": "openai/gpt-5.4-mini" },
+        "beta": { "model": "openai/gpt-5.3-codex" },
+        "gamma": { "model": "google/gemini-3-pro" }
+      }
+    },
+    "default_preset": "default",
+    "timeout": 180000,
+    "councillor_execution_mode": "serial"
+  },
   "presets": {
     "openai": {
       "orchestrator": { "model": "openai/gpt-5.5" },
@@ -29,7 +46,8 @@
       "librarian": { "model": "openai/gpt-5.4-mini", "variant": "low" },
       "explorer": { "model": "openai/gpt-5.4-mini", "variant": "low" },
       "designer": { "model": "openai/gpt-5.4-mini", "variant": "medium" },
-      "fixer": { "model": "openai/gpt-5.4-mini", "variant": "low" }
+      "fixer": { "model": "openai/gpt-5.4-mini", "variant": "low" },
+      "council": { "model": "openai/gpt-5.4-mini" }
     }
   }
 }

@@ -21,3 +21,16 @@ export function ensureConfigDir(): void {
   const dir = getConfigDir();
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
+
+/** OpenCode config directories in read/search order (custom first, then default). */
+export function getConfigSearchDirs(): string[] {
+  const dirs = [getConfigDir()];
+  const xdg = process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config");
+  const defaultDir = join(xdg, "opencode");
+  if (!dirs.includes(defaultDir)) {
+    dirs.push(defaultDir);
+  }
+  return dirs.filter(
+    (dir, index) => Boolean(dir) && dirs.indexOf(dir) === index,
+  );
+}
