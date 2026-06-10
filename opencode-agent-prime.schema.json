@@ -24,10 +24,7 @@
     "locale": {
       "default": "zh-TW",
       "type": "string",
-      "enum": [
-        "zh-TW",
-        "en"
-      ]
+      "enum": ["zh-TW", "en"]
     },
     "lessons": {
       "default": {
@@ -75,12 +72,7 @@
         "minComplexity": {
           "default": "L3",
           "type": "string",
-          "enum": [
-            "L1",
-            "L2",
-            "L3",
-            "L4"
-          ]
+          "enum": ["L1", "L2", "L3", "L4"]
         }
       }
     },
@@ -266,10 +258,7 @@
           "default": "parallel",
           "description": "Execution mode for councillors. \"serial\" runs them one at a time (required for single-model systems). \"parallel\" runs them concurrently (default, faster for multi-model systems).",
           "type": "string",
-          "enum": [
-            "parallel",
-            "serial"
-          ]
+          "enum": ["parallel", "serial"]
         },
         "councillor_retries": {
           "default": 3,
@@ -288,9 +277,7 @@
           "description": "DEPRECATED — ignored. No separate master session."
         }
       },
-      "required": [
-        "presets"
-      ]
+      "required": ["presets"]
     }
   },
   "additionalProperties": false,
