@@ -1,6 +1,6 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { createAgents, getAgentConfigs } from "./agents";
-import { loadPluginConfig } from "./config";
+import { isMasterAgentName, loadPluginConfig } from "./config";
 import { CouncilManager } from "./council";
 import {
   createDelegateTaskRetryHook,
@@ -67,7 +67,7 @@ const OpenCodeAgentPrime: Plugin = async (ctx) => {
     readContextMinLines: config.sessionManager?.readContextMinLines ?? 10,
     readContextMaxFiles: config.sessionManager?.readContextMaxFiles ?? 8,
     shouldManageSession: (sessionID) =>
-      sessionAgents.get(sessionID) === "orchestrator",
+      isMasterAgentName(sessionAgents.get(sessionID)),
   });
 
   const councilTools = config.council

@@ -1,6 +1,6 @@
 import * as fs from "node:fs/promises";
 import { join } from "node:path";
-import type { PluginConfig } from "../config";
+import { isMasterAgentName, type PluginConfig } from "../config";
 
 interface SystemTransformOutput {
   system: string[];
@@ -60,7 +60,7 @@ export function createLessonsRsiHook(
   return {
     "experimental.chat.system.transform": async (input, output) => {
       if (!input.sessionID) return;
-      if (options?.getAgentName?.(input.sessionID) !== "orchestrator") {
+      if (!isMasterAgentName(options?.getAgentName?.(input.sessionID))) {
         return;
       }
 
@@ -91,7 +91,7 @@ export function createLessonsRsiHook(
       const info = props.info as { id?: string; parentID?: string } | undefined;
       const sessionID = info?.id;
       if (!sessionID || info?.parentID) return;
-      if (options?.getAgentName?.(sessionID) !== "orchestrator") return;
+      if (!isMasterAgentName(options?.getAgentName?.(sessionID))) return;
 
       const path = config.lessons.path;
       pendingIdleReminders.set(

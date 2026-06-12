@@ -1,4 +1,4 @@
-import type { PluginConfig } from "../config";
+import { isMasterAgentName, type PluginConfig } from "../config";
 import { PLAN_MODE_REMINDER } from "../config/constants";
 
 interface SystemTransformOutput {
@@ -18,7 +18,7 @@ export function createPlanModeHook(
     "experimental.chat.system.transform": async (input, output) => {
       if (!config.planMode.enabled) return;
       if (!input.sessionID) return;
-      if (options?.getAgentName?.(input.sessionID) !== "orchestrator") {
+      if (!isMasterAgentName(options?.getAgentName?.(input.sessionID))) {
         return;
       }
 

@@ -10,6 +10,7 @@
       "items": {
         "type": "string",
         "enum": [
+          "mastermind",
           "orchestrator",
           "explorer",
           "librarian",

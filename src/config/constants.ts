@@ -1,4 +1,7 @@
-export const ORCHESTRATOR_NAME = "orchestrator" as const;
+export const MASTER_AGENT_NAME = "mastermind" as const;
+export const LEGACY_ORCHESTRATOR_NAME = "orchestrator" as const;
+/** @deprecated Use MASTER_AGENT_NAME for the primary agent. */
+export const ORCHESTRATOR_NAME = LEGACY_ORCHESTRATOR_NAME;
 
 export const SUBAGENT_NAMES = [
   "explorer",
@@ -10,7 +13,11 @@ export const SUBAGENT_NAMES = [
   "councillor",
 ] as const;
 
-export const ALL_AGENT_NAMES = [ORCHESTRATOR_NAME, ...SUBAGENT_NAMES] as const;
+export const ALL_AGENT_NAMES = [
+  MASTER_AGENT_NAME,
+  LEGACY_ORCHESTRATOR_NAME,
+  ...SUBAGENT_NAMES,
+] as const;
 
 export type AgentName = (typeof ALL_AGENT_NAMES)[number];
 
@@ -24,11 +31,16 @@ export const ORCHESTRATABLE_AGENTS = [
 ] as const;
 
 /** Agents that cannot be disabled even if listed in disabled_agents config. */
-export const PROTECTED_AGENTS = new Set<string>(["orchestrator", "councillor"]);
+export const PROTECTED_AGENTS = new Set<string>([
+  MASTER_AGENT_NAME,
+  LEGACY_ORCHESTRATOR_NAME,
+  "councillor",
+]);
 
 export const DEFAULT_DISABLED_AGENTS = new Set<string>();
 
 export const DEFAULT_MODELS: Record<AgentName, string | undefined> = {
+  mastermind: undefined,
   orchestrator: undefined,
   oracle: "openai/gpt-5.5",
   librarian: "openai/gpt-5.4-mini",
@@ -71,3 +83,9 @@ Before delivery confirm: primary goal achieved, edge cases handled, commands
 actually executed and verified, no secrets leaked, plan/spec satisfied. Declare
 quality: PRODUCTION | PROTOTYPE | DRAFT.
 </pre_delivery_review>`;
+
+export function isMasterAgentName(agentName: string | undefined): boolean {
+  return (
+    agentName === MASTER_AGENT_NAME || agentName === LEGACY_ORCHESTRATOR_NAME
+  );
+}

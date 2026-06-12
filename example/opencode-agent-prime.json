@@ -41,7 +41,7 @@
   },
   "presets": {
     "openai": {
-      "orchestrator": { "model": "openai/gpt-5.5" },
+      "mastermind": { "model": "openai/gpt-5.5" },
       "oracle": { "model": "openai/gpt-5.5", "variant": "high" },
       "librarian": { "model": "openai/gpt-5.4-mini", "variant": "low" },
       "explorer": { "model": "openai/gpt-5.4-mini", "variant": "low" },

@@ -1,4 +1,4 @@
-import type { PluginConfig } from "../config";
+import { isMasterAgentName, type PluginConfig } from "../config";
 
 interface SystemTransformOutput {
   system: string[];
@@ -19,7 +19,7 @@ export function createMemoryMcpHook(
         return;
       }
       if (!input.sessionID) return;
-      if (options?.getAgentName?.(input.sessionID) !== "orchestrator") {
+      if (!isMasterAgentName(options?.getAgentName?.(input.sessionID))) {
         return;
       }
 

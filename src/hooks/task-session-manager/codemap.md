@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Provides resumable-task state for `task` tool calls so orchestrator users can
+Provides resumable-task state for `task` tool calls so Mastermind users can
 resume work in a parent session by using short aliases (`exp-1`, `ora-2`) instead
 of raw child session IDs.
 
@@ -20,7 +20,7 @@ of raw child session IDs.
 - In-flight calls are tracked by `callID` in a capped ordered map (`MAX_PENDING_TASK_CALLS`)
   to rewrite inputs and correlate outputs safely.
 - Session governance is feature-gated by `shouldManageSession(sessionID)`, allowing
-  the hook to run only for orchestrator-managed sessions.
+  the hook to run only for Mastermind-managed sessions.
 
 ## Flow
 

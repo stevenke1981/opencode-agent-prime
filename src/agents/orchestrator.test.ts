@@ -3,9 +3,10 @@ import { PluginConfigSchema } from "../config/schema";
 import { buildOrchestratorPrompt } from "./orchestrator";
 
 describe("buildOrchestratorPrompt", () => {
-  test("includes AGENT-PRIME mission and zh-TW locale", () => {
+  test("includes Mastermind mission and zh-TW locale", () => {
     const config = PluginConfigSchema.parse({ locale: "zh-TW" });
     const prompt = buildOrchestratorPrompt(config);
+    expect(prompt).toContain("Mastermind");
     expect(prompt).toContain("AGENT-PRIME");
     expect(prompt).toContain("Traditional Chinese (zh-TW)");
     expect(prompt).toContain("lessons.md");

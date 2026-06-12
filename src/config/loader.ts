@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { LEGACY_ORCHESTRATOR_NAME, MASTER_AGENT_NAME } from "./constants";
 import { type PluginConfig, PluginConfigSchema } from "./schema";
 
 const CONFIG_FILE = "opencode-agent-prime.json";
@@ -26,9 +27,22 @@ export function getAgentOverride(
   config: PluginConfig,
   agentName: string,
 ): import("./schema").AgentOverrideConfig | undefined {
+  const candidateNames =
+    agentName === MASTER_AGENT_NAME
+      ? [MASTER_AGENT_NAME, LEGACY_ORCHESTRATOR_NAME]
+      : [agentName];
   const presetName = config.preset;
-  if (presetName && config.presets?.[presetName]?.[agentName]) {
-    return config.presets[presetName][agentName];
+  if (presetName) {
+    for (const candidateName of candidateNames) {
+      const override = config.presets?.[presetName]?.[candidateName];
+      if (override) return override;
+    }
   }
-  return config.agents?.[agentName];
+  for (const candidateName of candidateNames) {
+    const override = config.agents?.[candidateName];
+    if (override) {
+      return override;
+    }
+  }
+  return undefined;
 }

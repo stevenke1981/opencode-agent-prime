@@ -1,4 +1,4 @@
-import type { PluginConfig } from "../config";
+import { isMasterAgentName, type PluginConfig } from "../config";
 import { ERROR_RECOVERY_REMINDER } from "../config/constants";
 
 interface SystemTransformOutput {
@@ -57,7 +57,7 @@ export function createErrorRecoveryHook(
 
     "experimental.chat.system.transform": async (input, output) => {
       if (!input.sessionID) return;
-      if (options?.getAgentName?.(input.sessionID) !== "orchestrator") {
+      if (!isMasterAgentName(options?.getAgentName?.(input.sessionID))) {
         return;
       }
       const escalation = consumeErrorEscalation(input.sessionID);

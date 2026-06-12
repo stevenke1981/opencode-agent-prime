@@ -4,7 +4,9 @@ import {
   DEFAULT_DISABLED_AGENTS,
   DEFAULT_MODELS,
   getAgentOverride,
+  isMasterAgentName,
   loadPluginConfig,
+  MASTER_AGENT_NAME,
   type PluginConfig,
   PROTECTED_AGENTS,
   SUBAGENT_NAMES,
@@ -71,7 +73,7 @@ function applyAgentClassification(name: string, config: SDKAgentConfig): void {
     (config as SDKAgentConfig & { hidden?: boolean }).hidden = true;
     return;
   }
-  if (name === "orchestrator") {
+  if (isMasterAgentName(name)) {
     config.mode = "primary";
     return;
   }
@@ -99,15 +101,15 @@ export function createAgents(
   const disabled = getDisabledAgents(resolved);
   const agents: Record<string, RegisteredAgent> = {};
 
-  if (!disabled.has("orchestrator")) {
-    const orchestrator = createOrchestratorAgent(
+  if (!disabled.has(MASTER_AGENT_NAME)) {
+    const mastermind = createOrchestratorAgent(
       resolved,
-      getAgentOverride(resolved, "orchestrator")?.model ??
-        DEFAULT_MODELS.orchestrator,
+      getAgentOverride(resolved, MASTER_AGENT_NAME)?.model ??
+        DEFAULT_MODELS[MASTER_AGENT_NAME],
     );
-    applyOverride(orchestrator, getAgentOverride(resolved, "orchestrator"));
-    applyDefaultPermissions(orchestrator);
-    agents.orchestrator = orchestrator;
+    applyOverride(mastermind, getAgentOverride(resolved, MASTER_AGENT_NAME));
+    applyDefaultPermissions(mastermind);
+    agents[MASTER_AGENT_NAME] = mastermind;
   }
 
   for (const name of USER_FACING_SUBAGENTS) {
@@ -149,7 +151,10 @@ export function getAgentConfigs(
 ): Record<string, SDKAgentConfig> {
   const configs: Record<string, SDKAgentConfig> = {};
   for (const [name, agent] of Object.entries(agents)) {
-    configs[name] = agent.config;
+    configs[name] = {
+      ...agent.config,
+      description: agent.config.description ?? agent.description,
+    };
   }
   return configs;
 }

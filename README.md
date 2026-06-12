@@ -12,15 +12,15 @@ but it is intentionally smaller and opinionated around the AGENT-PRIME workflow.
 
 ## For Humans
 
-Use this plugin when you want OpenCode to start with a strong primary
-orchestrator and a small specialist bench instead of the default general-purpose
+Use this plugin when you want OpenCode to start with Mastermind as the primary
+agent and a small specialist bench instead of the default general-purpose
 agent set.
 
 ### What You Get
 
 | Area | Included behavior |
 | --- | --- |
-| Primary agent | `orchestrator`, the AGENT-PRIME coordinator |
+| Primary agent | `mastermind`, displayed as Mastermind |
 | Specialists | `explorer`, `librarian`, `oracle`, `designer`, `fixer` |
 | Optional review | `council` plus hidden `councillor` workers |
 | Tools | `ast_grep_search`, `ast_grep_replace`, `webfetch`, `council_session` |
@@ -102,7 +102,7 @@ Minimal example:
   "locale": "zh-TW",
   "presets": {
     "openai": {
-      "orchestrator": { "model": "openai/gpt-5.5" },
+      "mastermind": { "model": "openai/gpt-5.5" },
       "oracle": { "model": "openai/gpt-5.5", "variant": "high" },
       "librarian": { "model": "openai/gpt-5.4-mini", "variant": "low" },
       "explorer": { "model": "openai/gpt-5.4-mini", "variant": "low" },
@@ -215,7 +215,7 @@ Session start
   - disable OpenCode built-in build/explore/general/plan agents
 
 Task execution
-  - L1/L2 work stays with orchestrator
+  - L1/L2 work stays with Mastermind
   - L3+ work gets a file-backed plan
   - specialist work is delegated through task()
   - task sessions are reused when context still matches
@@ -230,7 +230,7 @@ Council flow
 
 | Area | oh-my-opencode-slim | opencode-agent-prime |
 | --- | --- | --- |
-| Identity | Multi-agent pantheon | AGENT-PRIME orchestrator plus lean specialists |
+| Identity | Multi-agent pantheon | Mastermind plus lean specialists |
 | Learning | Evolution log and evolver | `lessons.md` RSI |
 | Planning | Phase reminders | `.opencode/plans/` protocol |
 | Memory MCP | Configurable | Task-start reminder |
