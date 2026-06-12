@@ -33,6 +33,7 @@
   "files": [
     "dist",
     "example",
+    "scripts/remove-opencode-agent-prime.ps1",
     "opencode-agent-prime.schema.json",
     "README.md",
     "LICENSE"

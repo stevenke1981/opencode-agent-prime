@@ -15,6 +15,7 @@ Writes to ~/.config/opencode (or OPENCODE_CONFIG_DIR):
   - AGENTS.md
   - opencode.jsonc
   - opencode-agent-prime.json
+  - plugins/opencode-agent-prime.js when installing from a local checkout
 `);
   process.exit(0);
 }
@@ -34,6 +35,12 @@ if (!result.success) {
 
 console.log(`> ${result.message}`);
 console.log(`> Config directory: ${result.configDir}`);
+if (result.pluginEntry) {
+  console.log(`> OpenCode npm plugin entry: ${result.pluginEntry}`);
+}
+if (result.pluginShimPath) {
+  console.log(`> OpenCode local plugin shim: ${result.pluginShimPath}`);
+}
 if (result.dryRunConfig) {
   console.log("> Merged opencode.jsonc preview:");
   console.log(JSON.stringify(result.dryRunConfig, null, 2));

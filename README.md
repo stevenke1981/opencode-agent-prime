@@ -31,7 +31,17 @@ agent set.
 
 ### Install From npm
 
-After the package is published:
+After the package is published, OpenCode can install it as an npm plugin from
+the `plugin` list in `opencode.jsonc`:
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-agent-prime"]
+}
+```
+
+The installer merges that entry with your existing OpenCode config:
 
 ```bash
 npx opencode-agent-prime install
@@ -44,17 +54,21 @@ git clone https://github.com/stevenke1981/opencode-agent-prime.git
 cd opencode-agent-prime
 npm install
 npm run build
-npx opencode-agent-prime install
+node ./dist/cli/index.js install
 ```
 
 The installer writes to `~/.config/opencode`, or to `$OPENCODE_CONFIG_DIR` when
-that environment variable is set.
+that environment variable is set. Local checkout installs create
+`plugins/opencode-agent-prime.js`, a small ESM shim that re-exports the built
+`dist/index.js` plugin. This matches OpenCode's local plugin directory loading
+instead of requiring a package-root path in `opencode.jsonc`.
 
 | File | Purpose |
 | --- | --- |
 | `AGENTS.md` | Global AGENT-PRIME operating rules copied from `example/AGENTS.md` |
-| `opencode.jsonc` | OpenCode host config with this plugin, MCP, disabled defaults, and LSP |
+| `opencode.jsonc` | OpenCode host config with plugin npm entry when installed from npm, MCP, disabled defaults, and LSP |
 | `opencode-agent-prime.json` | Plugin presets, locale, hook settings, council settings |
+| `plugins/opencode-agent-prime.js` | Local checkout shim generated only for source installs |
 
 Preview the host config merge before writing anything:
 
@@ -64,6 +78,27 @@ npx opencode-agent-prime install --dry-run
 
 Use `--overwrite` only when you want to replace existing generated files. The
 installer backs up replaced files with `.bak`.
+
+### Remove The Install
+
+Preview removal first:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\remove-opencode-agent-prime.ps1 -DryRun
+```
+
+Run the remover without `-Delete` to move installed files into a timestamped
+`_removed\opencode-agent-prime-*` backup folder:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\remove-opencode-agent-prime.ps1
+```
+
+The remover updates `opencode.jsonc`, removes `opencode-agent-prime` plugin
+entries, removes disable-only built-in agent overrides that the installer
+created, and removes `opencode-agent-prime.json` plus the local plugin shim.
+It leaves `AGENTS.md` in place unless you pass `-RemoveAgents`. Use `-Delete`
+only when you want permanent deletion instead of backup-first removal.
 
 ### Verify The Install
 
@@ -152,6 +187,7 @@ non-code files.
 | `src/config/` | Zod config schemas, defaults, loader, and constants |
 | `src/cli/` | Installer, config merge logic, path helpers |
 | `example/` | Files copied into the user's OpenCode config directory |
+| `scripts/remove-opencode-agent-prime.ps1` | Backup-first remover for global or custom OpenCode config directories |
 | `scripts/generate-schema.ts` | Regenerates `opencode-agent-prime.schema.json` |
 
 ### Maintenance Rules
@@ -161,6 +197,12 @@ non-code files.
 - Preserve existing OpenCode user config when editing installer behavior.
   `src/cli/install.ts` should merge rather than clobber unrelated plugins, MCPs,
   agents, and `lsp`.
+- Keep plugin loading aligned with OpenCode's documented surfaces: npm installs
+  add `opencode-agent-prime` to the `plugin` list, and local checkout installs
+  generate `plugins/opencode-agent-prime.js`.
+- Keep install and remove paths paired. The remover should default to backup
+  moves, reserve permanent deletion for `-Delete`, and preserve unrelated
+  OpenCode config.
 - Keep `example/AGENTS.md`, README behavior, schema, and installer output in
   agreement.
 - Regenerate `opencode-agent-prime.schema.json` through `npm run build` after
@@ -180,6 +222,7 @@ npm run typecheck
 npm test
 npm run build
 npm pack --dry-run
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\remove-opencode-agent-prime.ps1 -DryRun
 ```
 
 Useful smoke test:
@@ -191,7 +234,8 @@ node ./dist/cli/index.js install --dry-run
 Expected behavior from the smoke test:
 
 - no files are written
-- local checkout installs preview as the package root path
+- local checkout install previews include a generated
+  `plugins/opencode-agent-prime.js` shim and omit the package from `plugin`
 - npm or `npx` installs preview as `opencode-agent-prime`
 - unrelated existing OpenCode config fields remain present
 
@@ -199,8 +243,8 @@ Expected behavior from the smoke test:
 
 1. Update `version` in `package.json`.
 2. Run all validation gates.
-3. Confirm `npm pack --dry-run` includes `dist`, `example`, schema, README, and
-   LICENSE.
+3. Confirm `npm pack --dry-run` includes `dist`, `example`, the remover script,
+   schema, README, and LICENSE.
 4. Commit source, schema, tests, and docs.
 5. Publish only after testing install behavior against a disposable
    `OPENCODE_CONFIG_DIR`.

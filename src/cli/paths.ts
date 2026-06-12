@@ -13,6 +13,14 @@ export function getPluginConfigPath(): string {
   return join(getConfigDir(), "opencode-agent-prime.json");
 }
 
+export function getPluginsDir(): string {
+  return join(getConfigDir(), "plugins");
+}
+
+export function getPluginShimPath(): string {
+  return join(getPluginsDir(), "opencode-agent-prime.js");
+}
+
 export function getOpenCodeConfigJsonc(): string {
   return join(getConfigDir(), "opencode.jsonc");
 }
