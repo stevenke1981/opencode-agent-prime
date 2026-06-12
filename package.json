@@ -4,6 +4,12 @@
   "description": "AGENT-PRIME orchestration plugin for OpenCode — lessons RSI, plan mode, memory MCP, specialist delegation, ast-grep, webfetch, council",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "bin": {
     "opencode-agent-prime": "./dist/cli/index.js"
   },

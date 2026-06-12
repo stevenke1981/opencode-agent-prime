@@ -3,12 +3,13 @@ import { installAgentPrime } from "./install";
 
 const args = process.argv.slice(2);
 const overwrite = args.includes("--overwrite") || args.includes("-f");
+const dryRun = args.includes("--dry-run");
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`opencode-agent-prime installer
 
 Usage:
-  opencode-agent-prime install [--overwrite]
+  opencode-agent-prime install [--overwrite] [--dry-run]
 
 Writes to ~/.config/opencode (or OPENCODE_CONFIG_DIR):
   - AGENTS.md
@@ -25,7 +26,7 @@ if (command !== "install") {
   process.exit(1);
 }
 
-const result = installAgentPrime({ overwrite });
+const result = installAgentPrime({ dryRun, overwrite });
 if (!result.success) {
   console.error(result.message);
   process.exit(1);
@@ -33,4 +34,9 @@ if (!result.success) {
 
 console.log(`> ${result.message}`);
 console.log(`> Config directory: ${result.configDir}`);
-console.log("> Start OpenCode: opencode");
+if (result.dryRunConfig) {
+  console.log("> Merged opencode.jsonc preview:");
+  console.log(JSON.stringify(result.dryRunConfig, null, 2));
+} else {
+  console.log("> Start OpenCode: opencode");
+}
