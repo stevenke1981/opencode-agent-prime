@@ -233,7 +233,7 @@ git branch -d feat/<task-name>
 
 ## § 5 · Tool Usage
 
-### 5.1 Codebase Memory MCP (Auto-use)
+### 5.1 Codebase RLM Memory MCP (Auto-use) — CBRLM (codebase-rlm-memory-mcp)
 
 **Query at task start** to load relevant codebase context before touching code:
 

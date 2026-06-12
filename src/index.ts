@@ -59,7 +59,10 @@ const OpenCodeAgentPrime: Plugin = async (ctx) => {
     getAgentName,
   });
   const planModeHook = createPlanModeHook(config, { getAgentName });
-  const memoryMcpHook = createMemoryMcpHook(config, { getAgentName });
+  const memoryMcpHook = createMemoryMcpHook(config, {
+    getAgentName,
+    directory: ctx.directory,
+  });
   const errorRecoveryHook = createErrorRecoveryHook(config, { getAgentName });
   const delegateTaskRetryHook = createDelegateTaskRetryHook(ctx);
   const taskSessionManagerHook = createTaskSessionManagerHook(ctx, {
