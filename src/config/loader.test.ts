@@ -11,17 +11,17 @@ describe("loadPluginConfig", () => {
     expect(config.errorRecovery.minAttemptsBeforeEscalate).toBe(3);
   });
 
-  test("uses legacy orchestrator preset for mastermind", () => {
+  test("uses legacy mastermind preset for orchestrator", () => {
     const config = PluginConfigSchema.parse({
       preset: "openai",
       presets: {
         openai: {
-          orchestrator: { model: "openai/legacy-primary" },
+          mastermind: { model: "openai/legacy-primary" },
         },
       },
     });
 
-    expect(getAgentOverride(config, "mastermind")?.model).toBe(
+    expect(getAgentOverride(config, "orchestrator")?.model).toBe(
       "openai/legacy-primary",
     );
   });

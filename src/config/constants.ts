@@ -1,7 +1,6 @@
-export const MASTER_AGENT_NAME = "mastermind" as const;
-export const LEGACY_ORCHESTRATOR_NAME = "orchestrator" as const;
-/** @deprecated Use MASTER_AGENT_NAME for the primary agent. */
-export const ORCHESTRATOR_NAME = LEGACY_ORCHESTRATOR_NAME;
+export const ORCHESTRATOR_NAME = "orchestrator" as const;
+export const LEGACY_MASTER_AGENT_NAME = "mastermind" as const;
+export const MASTER_AGENT_NAME = ORCHESTRATOR_NAME;
 
 export const SUBAGENT_NAMES = [
   "explorer",
@@ -15,7 +14,7 @@ export const SUBAGENT_NAMES = [
 
 export const ALL_AGENT_NAMES = [
   MASTER_AGENT_NAME,
-  LEGACY_ORCHESTRATOR_NAME,
+  LEGACY_MASTER_AGENT_NAME,
   ...SUBAGENT_NAMES,
 ] as const;
 
@@ -33,7 +32,7 @@ export const ORCHESTRATABLE_AGENTS = [
 /** Agents that cannot be disabled even if listed in disabled_agents config. */
 export const PROTECTED_AGENTS = new Set<string>([
   MASTER_AGENT_NAME,
-  LEGACY_ORCHESTRATOR_NAME,
+  LEGACY_MASTER_AGENT_NAME,
   "councillor",
 ]);
 
@@ -86,6 +85,6 @@ quality: PRODUCTION | PROTOTYPE | DRAFT.
 
 export function isMasterAgentName(agentName: string | undefined): boolean {
   return (
-    agentName === MASTER_AGENT_NAME || agentName === LEGACY_ORCHESTRATOR_NAME
+    agentName === MASTER_AGENT_NAME || agentName === LEGACY_MASTER_AGENT_NAME
   );
 }

@@ -50,7 +50,7 @@ export function buildOrchestratorPrompt(config: PluginConfig): string {
   const lessonsPath = config.lessons.path;
   const councilSection = config.council ? `\n\n${COUNCIL_BLOCK}` : "";
 
-  return `You are Mastermind — the AGENT-PRIME execution lead for OpenCode.
+  return `You are Orchestrator — the AGENT-PRIME execution lead for OpenCode.
 
 ## Mission
 Complete every task by any means necessary.
@@ -78,7 +78,7 @@ ${specialists}${councilSection}
 ${backgroundDelegationBlock()}
 
 ## Delegation rules
-- Mastermind plans, routes, verifies, and integrates — not bulk implementation.
+- Orchestrator plans, routes, verifies, and integrates — not bulk implementation.
 - Single small edit (<20 lines, one file): do it yourself.
 - Parallel discovery: spawn multiple @explorer tasks with run_in_background=true.
 - Parallel implementation: scope per folder and spawn @fixer per scope.
@@ -101,10 +101,11 @@ export function createOrchestratorAgent(
   return {
     name: MASTER_AGENT_NAME,
     description:
-      "Mastermind — AGENT-PRIME lead for planning, delegation, verification, and RSI lessons",
+      "Orchestrator — AGENT-PRIME lead for planning, delegation, verification, and RSI lessons",
     config: {
       model,
       mode: "primary",
+      color: "#FACC15",
       prompt: buildOrchestratorPrompt(config),
       permission: {
         edit: "allow",

@@ -102,14 +102,14 @@ export function createAgents(
   const agents: Record<string, RegisteredAgent> = {};
 
   if (!disabled.has(MASTER_AGENT_NAME)) {
-    const mastermind = createOrchestratorAgent(
+    const orchestrator = createOrchestratorAgent(
       resolved,
       getAgentOverride(resolved, MASTER_AGENT_NAME)?.model ??
         DEFAULT_MODELS[MASTER_AGENT_NAME],
     );
-    applyOverride(mastermind, getAgentOverride(resolved, MASTER_AGENT_NAME));
-    applyDefaultPermissions(mastermind);
-    agents[MASTER_AGENT_NAME] = mastermind;
+    applyOverride(orchestrator, getAgentOverride(resolved, MASTER_AGENT_NAME));
+    applyDefaultPermissions(orchestrator);
+    agents[MASTER_AGENT_NAME] = orchestrator;
   }
 
   for (const name of USER_FACING_SUBAGENTS) {

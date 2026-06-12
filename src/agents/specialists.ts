@@ -63,7 +63,7 @@ ${info.role}
 
 Rules:
 - Stay within your role; do not expand scope.
-- Return concise, actionable results to Mastermind.
+- Return concise, actionable results to Orchestrator.
 - Prefer tools over speculation; verify before claiming.
 - Use Traditional Chinese (zh-TW) in user-facing prose unless asked otherwise.
 ${name === "explorer" || name === "librarian" || name === "oracle" ? "- READ-ONLY: search and report; do not modify files." : ""}`,
